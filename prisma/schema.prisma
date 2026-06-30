@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime       @default(now())
+  workoutPlans  WorkoutPlan[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+enum Category {
+  CARDIO
+  STRENGTH
+  FLEXIBILITY
+}
+
+enum MuscleGroup {
+  CHEST
+  BACK
+  LEGS
+  SHOULDERS
+  ARMS
+  CORE
+  FULL_BODY
+}
+
+model Exercise {
+  id               String            @id @default(uuid())
+  name             String
+  description      String
+  category         Category
+  muscleGroup      MuscleGroup?
+  workoutExercises WorkoutExercise[]
+  createdAt        DateTime          @default(now())
+
+  @@map("exercises")
+}
+
+enum WorkoutStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model WorkoutPlan {
+  id          String            @id @default(uuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  comments    String?
+  scheduledAt DateTime?
+  status      WorkoutStatus     @default(PENDING)
+  exercises   WorkoutExercise[]
+  logs        WorkoutLog[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([userId, scheduledAt])
+  @@map("workout_plans")
+}
+
+model WorkoutExercise {
+  id            String      @id @default(uuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  exerciseId    String
+  exercise      Exercise    @relation(fields: [exerciseId], references: [id])
+  sets          Int
+  reps          Int
+  weightKg      Float?
+  order         Int
+
+  @@index([workoutPlanId])
+  @@map("workout_exercises")
+}
+
+model WorkoutLog {
+  id            String      @id @default(uuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  completedAt   DateTime
+  notes         String?
+
+  @@index([workoutPlanId])
+  @@map("workout_logs")
+}
