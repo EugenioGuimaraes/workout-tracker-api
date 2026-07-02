@@ -2,6 +2,10 @@
 
 REST API for workout tracking built as a portfolio project. Covers authentication with refresh-token rotation, workout plan management, exercise catalog, and training history reports.
 
+
+Full interactive docs at https://workout-tracker-api-production-cbb4.up.railway.app/api/docs
+
+
 ## Tech Stack
 
 | Layer | Choice |
