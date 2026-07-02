@@ -111,7 +111,7 @@ export class AuthService {
         },
       ),
       this.jwtService.signAsync(
-        { sub: userId },
+        { sub: userId, jti: crypto.randomUUID() },
         {
           secret: this.config.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ??
